@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+
+# Veri kümesi (büyük ham dosyalar)
+dataset/raw/*
+dataset/processed/*
+!dataset/raw/.gitkeep
+!dataset/processed/.gitkeep
+
+# Model ağırlıkları ve geçici loglar
+result/models/*.pt
+result/models/*.pth
+result/models/*.onnx
+result/logs/*.log
+
+# IDE ve OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

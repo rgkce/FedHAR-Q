@@ -1,0 +1,62 @@
+# ============================================================================
+# FedHAR-Q: Merkezi Konfigürasyon Dosyası (E1 - E7 Deney Matrisi İçin)
+# ============================================================================
+
+project:
+  name: "FedHAR-Q"
+  description: "Evaluating the Joint Impact of Differential Privacy and Quantization on Federated HAR"
+  seeds: [42, 123, 999]               # En az 3 farklı rastgele tohum (zorunlu kapsam)
+  device: "cpu"                       # Adil gecikme (latency) ve INT8 CPU karşılaştırması için
+
+data:
+  dataset_name: "UCI_HAR"
+  raw_dir: "dataset/raw"
+  processed_dir: "dataset/processed"
+  in_channels: 9                      # body_acc (x,y,z), body_gyro (x,y,z), total_acc (x,y,z)
+  seq_len: 128                        # 2.56 saniye pencere (50 Hz)
+  num_classes: 6                      # WALKING, WALKING_UPSTAIRS, WALKING_DOWNSTAIRS, SITTING, STANDING, LAYING
+  val_subjects_count: 4               # 21 eğitim kişisinin 17'si Train, 4'ü Validation (Test: 9 kişi sabit)
+  batch_size: 64
+  eval_batch_size: 128
+
+model:
+  architecture: "FedHAR1DCNN"
+  conv_channels: [32, 64]             # Hafif 1D-CNN evrişim filtre sayıları
+  kernel_size: 5
+  num_groups: 8                       # BatchNorm yerine Opacus (DP) uyumlu GroupNorm grup sayısı
+  hidden_dim: 64
+  dropout: 0.2
+
+centralized:
+  epochs: 30
+  lr: 0.001
+  weight_decay: 0.0001
+
+federated:
+  strategy: "FedAvg"
+  num_clients: 17                     # Her eğitim katılımcısı (subject) kendi verisiyle 1 istemci (doğal Non-IID)
+  fraction_fit: 1.0                   # Her turda tüm istemciler katılır (küçük ölçekli kontrollü deney)
+  num_rounds: 30                      # Federatif iletişim turu (round) sayısı
+  local_epochs: 2                     # Her istemcinin tur başına yerel eğitim epoch sayısı
+  lr: 0.002
+  weight_decay: 0.0001
+
+privacy:
+  # Gizlilik birimi: Örnek düzeyi (Sample-level DP-SGD, Opacus RDPAccountant)
+  accountant: "rdp"
+  delta: 0.0001                       # delta = 1e-4 (< 1 / N_train)
+  max_grad_norm: 2.0                  # Örnek bazlı maksimum gradyan kırpma (clipping) eşiği C
+  dp_lr: 0.005                        # Kırpılmış DP-SGD gradyanları için öğrenme oranı
+  epsilon_1: 3.0                      # E4 ve E5 için sıkı gizlilik bütçesi hedefi (ε₁)
+  epsilon_2: 8.0                      # E6 ve E7 için daha esnek gizlilik bütçesi hedefi (ε₂)
+
+quantization:
+  dtype: "int8"                       # FP32 -> INT8 dönüşümü
+  method: "ptq_static"                # Post-Training Static Quantization
+  calibration_batches: 20             # Aktivasyon ölçeklendirme (scale/zero_point) için kalibrasyon yığını sayısı
+  backend: "x86"                      # x86 CPU'da fbgemm/x86, ARM/Raspberry Pi'de qnnpack
+
+benchmark:
+  warmup_runs: 50                     # Gecikme ölçümü öncesi ısınma turu
+  timed_runs: 500                     # Ortalama çıkarım gecikmesi (ms) için tekrar sayısı
+  latency_batch_size: 1               # Tekil örnek (gerçek zamanlı akış) çıkarım gecikmesi

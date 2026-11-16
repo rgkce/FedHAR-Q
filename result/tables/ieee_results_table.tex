@@ -1,0 +1,19 @@
+% FedHAR-Q IEEE Konferans Bildirisi Ana Sonuç Tablosu
+\begin{table*}[htbp]
+\centering
+\caption{UCI HAR Test Kümesi Üzerinde Diferansiyel Gizlilik ve INT8 Kuantizasyon Sonuçları (3 Tohum Ortalama $\pm$ Std)}
+\label{tab:main_results}
+\begin{tabular}{llccccccccc}
+\hline
+\textbf{Kod} & \textbf{Eğitim} & \textbf{Gizlilik} & $\boldsymbol{\varepsilon}$ ($\delta=10^{-4}$) & $\boldsymbol{\sigma}$ & \textbf{Temsil} & \textbf{Accuracy (\%)} & \textbf{Macro-F1 (\%)} & \textbf{Boyut (KB)} & \textbf{Gecikme (ms)} & \textbf{İletişim (MB)} \\
+\hline
+E1 & Centralized & None & $\infty$ & - & FP32 & $93.67 \pm 0.65$ & $93.62 \pm 0.69$ & 167.29 & $0.287 \pm 0.063$ & 0.00 \\
+E2 & Federated (FedAvg) & None & $\infty$ & - & FP32 & $90.02 \pm 0.74$ & $90.10 \pm 0.76$ & 167.29 & $0.299 \pm 0.040$ & 160.64 \\
+E3 & Federated (FedAvg) & None & $\infty$ & - & INT8 & $89.97 \pm 0.79$ & $90.05 \pm 0.81$ & 59.78 & $1.348 \pm 0.101$ & 160.64 \\
+E4 & Federated (FedAvg) & DP-SGD (eps=3.0) & $3.00$ & 4.39 & FP32 & $70.92 \pm 7.55$ & $68.91 \pm 8.62$ & 167.29 & $0.304 \pm 0.059$ & 160.64 \\
+E5 & Federated (FedAvg) & DP-SGD (eps=3.0) & $3.00$ & 4.39 & INT8 & $70.41 \pm 7.23$ & $68.19 \pm 8.26$ & 59.78 & $1.346 \pm 0.144$ & 160.64 \\
+E6 & Federated (FedAvg) & DP-SGD (eps=8.0) & $7.99$ & 2.03 & FP32 & $81.23 \pm 3.22$ & $80.91 \pm 3.24$ & 167.29 & $0.293 \pm 0.043$ & 160.64 \\
+E7 & Federated (FedAvg) & DP-SGD (eps=8.0) & $7.99$ & 2.03 & INT8 & $81.34 \pm 2.99$ & $81.05 \pm 2.99$ & 59.78 & $1.292 \pm 0.184$ & 160.64 \\
+\hline
+\end{tabular}
+\end{table*}

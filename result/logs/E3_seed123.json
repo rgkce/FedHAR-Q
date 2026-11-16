@@ -1,0 +1,92 @@
+{
+  "experiment_id": "E3",
+  "source_experiment_id": "E2",
+  "training_mode": "Federated (FedAvg)",
+  "privacy": "None",
+  "epsilon_target": null,
+  "epsilon_spent": null,
+  "delta": null,
+  "noise_multiplier": null,
+  "max_grad_norm": null,
+  "accountant": null,
+  "representation": "INT8",
+  "seed": 123,
+  "fp32_model_size_kb": 167.3,
+  "compression_ratio": 2.8,
+  "accuracy_delta_vs_fp32": -0.13,
+  "macro_f1_delta_vs_fp32": -0.13,
+  "loss": 0.5636,
+  "accuracy": 89.11,
+  "macro_f1": 89.18,
+  "per_class_f1": {
+    "WALKING": 96.26,
+    "WALKING_UPSTAIRS": 91.01,
+    "WALKING_DOWNSTAIRS": 91.8,
+    "SITTING": 77.81,
+    "STANDING": 80.9,
+    "LAYING": 97.32
+  },
+  "confusion_matrix": [
+    [
+      463,
+      0,
+      32,
+      1,
+      0,
+      0
+    ],
+    [
+      3,
+      425,
+      43,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      420,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      10,
+      0,
+      377,
+      104,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      100,
+      432,
+      0
+    ],
+    [
+      0,
+      28,
+      0,
+      0,
+      0,
+      509
+    ]
+  ],
+  "num_samples": 2947,
+  "model_size_kb": 59.8,
+  "latency_mean_ms": 1.2744,
+  "latency_std_ms": 0.1693,
+  "latency_median_ms": 1.1994,
+  "latency_p95_ms": 1.6161,
+  "model_serialized_kb": 59.85,
+  "activation_Buffer_kb": 130.1,
+  "peak_inference_footprint_kb": 189.95,
+  "python_tracemalloc_peak_kb": 3.8,
+  "single_model_payload_kb": 1.25,
+  "per_round_comm_mb": 0.042,
+  "total_comm_mb": 160.64
+}
