@@ -15,8 +15,13 @@ from __future__ import annotations
 
 import copy
 import json
+import sys
 from pathlib import Path
 from typing import Any, Dict, List
+
+CODE_DIR = Path(__file__).resolve().parents[1]
+if str(CODE_DIR) not in sys.path:
+    sys.path.insert(0, str(CODE_DIR))
 
 from flwr.server.strategy.aggregate import aggregate
 
