@@ -1,0 +1,26 @@
+# E3, E5 ve E7: FP32 -> INT8 Statik Kuantizasyon (PTQ) Konfigürasyonu
+method: "Post-Training Static Quantization (PTQ)"
+dtype: "int8 (qint8 weights, quint8 activations)"
+backends:
+  x86_cpu: "onednn"
+  arm_rpi: "qnnpack"
+
+calibration:
+  source: "Train split only (Zero test leakage)"
+  num_batches: 20
+  batch_size: 64
+  total_calibration_samples: 1280
+
+experiments:
+  E3:
+    source_fp32_experiment: "E2"
+    privacy: "None (ε = ∞)"
+    representation: "INT8"
+  E5:
+    source_fp32_experiment: "E4"
+    privacy: "DP-SGD (ε₁ = 3.0, δ = 1e-4)"
+    representation: "INT8"
+  E7:
+    source_fp32_experiment: "E6"
+    privacy: "DP-SGD (ε₂ = 8.0, δ = 1e-4)"
+    representation: "INT8"

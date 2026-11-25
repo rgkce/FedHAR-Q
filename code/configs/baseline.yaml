@@ -1,0 +1,32 @@
+# E1: Merkezi (Centralized) FP32 Baseline Konfigürasyonu
+experiment_id: "E1"
+training_mode: "Centralized"
+seeds: [42, 123, 999]
+device: "cpu"
+
+data:
+  dataset: "UCI_HAR"
+  in_channels: 9
+  seq_len: 128
+  num_classes: 6
+  train_subjects: 17
+  val_subjects: 4
+  test_subjects: 9
+  batch_size: 64
+  eval_batch_size: 128
+
+model:
+  architecture: "FedHAR1DCNN"
+  conv_channels: [32, 64, 64]
+  kernel_size: 5
+  num_groups: 8
+  hidden_dim: 64
+  dropout: 0.2
+
+training:
+  optimizer: "Adam"
+  epochs: 30
+  lr: 0.001
+  weight_decay: 0.0001
+  representation: "FP32"
+  privacy: "None"

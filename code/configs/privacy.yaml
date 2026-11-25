@@ -1,0 +1,21 @@
+# E4 ve E6: Opacus Diferansiyel Gizlilik (DP-SGD) ve Rényi DP Muhasebesi Konfigürasyonu
+framework: "Opacus (1.6.0)"
+privacy_unit: "Sample-level (per-window within client)"
+accountant: "RDPAccountant (Rényi Differential Privacy)"
+delta: 0.0001                # delta = 1e-4 (< 1 / N_train = 1 / 5879)
+max_grad_norm: 2.0           # L2 gradyan kırpma (clipping) eşiği C
+
+targets:
+  E4_strict_privacy:
+    experiment_id: "E4"
+    target_epsilon: 3.0      # ε₁ = 3.0 (Sıkı gizlilik bütçesi)
+    calibrated_sigma: 4.3911 # 30 round x 2 local epoch sonunda ε = 3.00 sağlayan gürültü çarpanı
+    dp_lr: 0.008
+    representation: "FP32"
+
+  E6_moderate_privacy:
+    experiment_id: "E6"
+    target_epsilon: 8.0      # ε₂ = 8.0 (Esnek/orta gizlilik bütçesi)
+    calibrated_sigma: 2.0334 # 30 round x 2 local epoch sonunda ε = 7.99 sağlayan gürültü çarpanı
+    dp_lr: 0.005
+    representation: "FP32"

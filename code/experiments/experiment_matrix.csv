@@ -1,0 +1,8 @@
+experiment_id,training_mode,privacy_regime,epsilon_target,delta,noise_multiplier_sigma,max_grad_norm,accountant,representation,num_clients,num_rounds,local_epochs,batch_size,lr,seeds,config_file
+E1,Centralized,None,inf,-,0.0,-,None,FP32,1,30,1,64,0.001,"42;123;999",code/configs/baseline.yaml
+E2,Federated (FedAvg),None,inf,-,0.0,-,None,FP32,17,30,2,64,0.002,"42;123;999",code/configs/federated.yaml
+E3,Federated (FedAvg),None,inf,-,0.0,-,None,INT8,17,30,2,64,0.002,"42;123;999",code/configs/quantization.yaml
+E4,Federated (FedAvg),DP-SGD (Strict),3.0,0.0001,4.3911,2.0,RDPAccountant,FP32,17,30,2,64,0.008,"42;123;999",code/configs/privacy.yaml
+E5,Federated (FedAvg),DP-SGD (Strict),3.0,0.0001,4.3911,2.0,RDPAccountant,INT8,17,30,2,64,0.008,"42;123;999",code/configs/quantization.yaml
+E6,Federated (FedAvg),DP-SGD (Moderate),8.0,0.0001,2.0334,2.0,RDPAccountant,FP32,17,30,2,64,0.005,"42;123;999",code/configs/privacy.yaml
+E7,Federated (FedAvg),DP-SGD (Moderate),8.0,0.0001,2.0334,2.0,RDPAccountant,INT8,17,30,2,64,0.005,"42;123;999",code/configs/quantization.yaml

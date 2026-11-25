@@ -1,0 +1,20 @@
+# E2: Federatif Öğrenme (Flower + FedAvg) FP32 Baseline Konfigürasyonu
+experiment_id: "E2"
+training_mode: "Federated (FedAvg)"
+seeds: [42, 123, 999]
+device: "cpu"
+
+federated:
+  framework: "Flower (flwr 1.43.0)"
+  strategy: "FedAvg"
+  partitioning: "Subject-wise natural Non-IID (1 participant = 1 client)"
+  num_clients: 17
+  fraction_fit: 1.0
+  num_rounds: 30
+  local_epochs: 2
+  batch_size: 64
+  optimizer: "Adam"
+  lr: 0.002
+  weight_decay: 0.0001
+  representation: "FP32"
+  privacy: "None"

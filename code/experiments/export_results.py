@@ -483,11 +483,129 @@ def generate_all_plots(logs: List[Dict[str, Any]], df_summary: pd.DataFrame) -> 
     return saved_paths
 
 
+def generate_presentation_pptx(df_summary: pd.DataFrame) -> Path:
+    """
+    Görev dokümanında teslim çıktısı olarak istenen 'Kısa ilerleme sunumu; temel deneylerin
+    tamamlandığını gösteren grafik veya tablo' için 8 slaytlık PowerPoint (.pptx) üretir.
+    """
+    from pptx import Presentation
+    from pptx.util import Inches, Pt
+
+    prs = Presentation()
+    prs.slide_width = Inches(13.333)
+    prs.slide_height = Inches(7.5)
+
+    def _add_bullets(title_text: str, bullets: List[str]) -> None:
+        slide = prs.slides.add_slide(prs.slide_layouts[1])
+        slide.shapes.title.text = title_text
+        tf = slide.placeholders[1].text_frame
+        tf.clear()
+        for i, b in enumerate(bullets):
+            p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+            p.text = b
+            p.font.size = Pt(18)
+            p.space_after = Pt(10)
+
+    # Slayt 1: Başlık
+    s1 = prs.slides.add_slide(prs.slide_layouts[0])
+    s1.shapes.title.text = "FedHAR-Q: Federated HAR Çalışması İlerleme Sunumu"
+    s1.placeholders[1].text_frame.text = (
+        "Federated İnsan Aktivite Tanımada Diferansiyel Gizlilik ve Kuantizasyonun Birlikte Etkisi\n"
+        "Evaluating the Joint Impact of Differential Privacy and Quantization on Federated HAR\n\n"
+        "Temel Deneylerin Tamamlanma Raporu (E1 - E7 Matrisi, 3 Tohum = 21 Koşu)"
+    )
+
+    # Slayt 2: Problem & Araştırma Soruları
+    _add_bullets(
+        "1. Problem, Amaç ve Araştırma Soruları",
+        [
+            "Amaç: UCI HAR üzerinde Federated Learning (Flower FedAvg), Differential Privacy (Opacus DP-SGD) ve INT8 Statik Kuantizasyonun birleşik etkisini kontrollü deneylerle ölçmek.",
+            "RQ1 (Gizlilik Etkisi): FL tabanlı HAR modeline DP (ε₁ = 3.0 ve ε₂ = 8.0, δ = 10⁻⁴) eklenmesi doğruluğu nasıl etkiler?",
+            "RQ2 (DP × INT8 Etkileşimi): INT8 kuantizasyonun etkisi DP bulunan ve bulunmayan modellerde farklı mıdır?",
+            "RQ3 (Kaynak Ödünleşimi): Doğruluk (Accuracy / Macro-F1), model boyutu (KB), bellek (KB) ve gecikme (ms) arasında nasıl bir pratik denge oluşur?",
+        ],
+    )
+
+    # Slayt 3: Veri Protokolü & 1D-CNN
+    _add_bullets(
+        "2. Veri Protokolü (Sıfır Sızıntı) ve 1D-CNN Mimarisi",
+        [
+            "UCI HAR Ham Sinyalleri: 9 kanal (body_acc, body_gyro, total_acc) × 128 zaman adımı (2.56 sn @ 50 Hz), 6 aktivite sınıfı.",
+            "Kişi Bazlı (Subject-Wise) Ayrım (Kesişim = ∅): 17 Eğitim Kişisi (5,879 örnek, 17 FL İstemcisi) | 4 Doğrulama Kişisi (1,473 örnek) | 9 Test Kişisi (2,947 örnek).",
+            "Hafif 1D-CNN (FedHAR1DCNN): Opacus DP uyumluluğu için BatchNorm yerine örnek-içi GroupNorm(8, C) kullanıldı (E1–E7 tüm koşullarda birebir aynı mimari).",
+            "Model Boyutu ve Kapasite: 3 Evrişim Bloğu + 2 Linear Katman -> Toplam 41,286 parametre (167.29 KB FP32 -> 59.78 KB INT8, 2.80× küçülme).",
+        ],
+    )
+
+    # Slayt 4: Ana Sonuç Tablosu (E1 - E7)
+    s4 = prs.slides.add_slide(prs.slide_layouts[5])
+    s4.shapes.title.text = "3. Ana Deney Matrisi Sonuç Tablosu (3 Tohum Ortalama ± Std)"
+    cols = [
+        "Kod",
+        "Eğitim",
+        "Gizlilik (DP)",
+        "Harcanan ε",
+        "σ",
+        "Temsil",
+        "Accuracy (%)",
+        "Macro-F1 (%)",
+        "Boyut (KB)",
+        "Bellek (KB)",
+        "İletişim (MB)",
+    ]
+    table = s4.shapes.add_table(
+        len(df_summary) + 1, len(cols), Inches(0.4), Inches(1.4), Inches(12.5), Inches(5.3)
+    ).table
+    for c_idx, col_name in enumerate(cols):
+        cell = table.cell(0, c_idx)
+        cell.text = col_name
+        cell.text_frame.paragraphs[0].font.size = Pt(13)
+        cell.text_frame.paragraphs[0].font.bold = True
+
+    for r_idx, (_, r) in enumerate(df_summary.iterrows(), start=1):
+        vals = [
+            str(r["experiment_id"]),
+            str(r["training_mode"]),
+            str(r["privacy"]),
+            str(r["epsilon_spent"]),
+            str(r["noise_multiplier"]),
+            str(r["representation"]),
+            str(r["accuracy_formatted"]),
+            str(r["macro_f1_formatted"]),
+            f"{r['model_size_kb']:.2f}",
+            f"{r['peak_memory_kb']:.2f}",
+            f"{r['fl_comm_mb']:.2f}",
+        ]
+        for c_idx, val in enumerate(vals):
+            cell = table.cell(r_idx, c_idx)
+            cell.text = val
+            cell.text_frame.paragraphs[0].font.size = Pt(12)
+
+    # Slayt 5-8: 4 Grafik
+    figs = [
+        ("4. E1–E7 Test Accuracy ve Macro-F1 Karşılaştırması", "paper/figures/fig1_accuracy_f1_comparison.png"),
+        ("5. Gizlilik Rejimi × INT8 Kuantizasyon Etkileşimi (RQ1 & RQ2)", "paper/figures/fig2_dp_quantization_interaction.png"),
+        ("6. Federatif Yakınsama ve RDPAccountant Gizlilik Bütçesi (ε) Artışı", "paper/figures/fig3_convergence_and_epsilon_curves.png"),
+        ("7. Model Boyutu–Doğruluk Ödünleşimi ve Sınıf Bazlı F1 Isı Haritası (RQ3)", "paper/figures/fig4_size_tradeoff_and_per_class_f1.png"),
+    ]
+    for title_text, rel_img in figs:
+        img_p = get_path(rel_img)
+        if img_p.exists():
+            sl = prs.slides.add_slide(prs.slide_layouts[5])
+            sl.shapes.title.text = title_text
+            sl.shapes.add_picture(str(img_p), Inches(1.0), Inches(1.4), width=Inches(11.3))
+
+    out_pptx = get_path("docs/FedHAR_Q_Kisa_Ilerleme_Sunumu.pptx")
+    prs.save(out_pptx)
+    return out_pptx
+
+
 def export_all() -> pd.DataFrame:
     logs = load_all_experiment_logs()
     df_summary = generate_summary_tables(logs)
     saved_plots = generate_all_plots(logs, df_summary)
-    print(f"[DIŞA AKTARIM TAMAMLANDI] {len(saved_plots)} grafik ve 3 özet tablo üretildi.")
+    pptx_path = generate_presentation_pptx(df_summary)
+    print(f"[DIŞA AKTARIM TAMAMLANDI] {len(saved_plots)} grafik, 3 özet tablo ve PowerPoint sunumu ({pptx_path.name}) üretildi.")
     return df_summary
 
 
